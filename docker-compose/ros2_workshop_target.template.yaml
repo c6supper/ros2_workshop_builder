@@ -11,14 +11,17 @@ services:
          - SYS_ADMIN 
       network_mode: ${APP_NETWORK_MODE}
       volumes:
-        - ${ROS2_WORKSHOP_TARGET_CODE_VOLUME}:${ROS2_WORKSHOP_TARGET_DIR}
+        - ${ROS2_WORKSHOP_TARGET_CODE_VOLUME}:${ROS2_WORKSHOP_TARGET_CODE_DIR}
       restart: ${APP_RESTART_POLICY}
       environment:
          RUN_AFTER_SIDECAR: 'no'
          APP_USER: ${APP_USER}
          PASS: ${PASS}
+         ROS2_WORKSHOP_TARGET_CODE_DIR: ${ROS2_WORKSHOP_TARGET_CODE_DIR}
       logging:
          driver: ${APP_LOGGING_DRIVER}
          options:
             max-size: ${APP_LOGGING_SIZE}
             max-file: ${APP_LOGGING_NUMBER}
+      extra_hosts:
+         - "raw.githubusercontent.com:${GITHUB_RAW_HOSTS}"

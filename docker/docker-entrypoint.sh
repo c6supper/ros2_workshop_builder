@@ -3,33 +3,35 @@
 set -ex
 
 patch_conf() {
-    
-    if [ ! -d "/opt/ros2_workshop_target704/target/ros2_workshop_target7" ]; then
-        cd /opt/ && echo $PASS | sudo -S tar -xf ros2_workshop_target700_host.tar.xz;echo $PASS | sudo -S rm -f ros2_workshop_target700_host.tar.xz;
-        cd /opt/ && echo $PASS | sudo -S tar -xf ros2_workshop_target_license.tar.gz;echo $PASS | sudo -S rm -f ros2_workshop_target_license.tar.gz;
-        echo $PASS | sudo -S mkdir -p /opt/ros2_workshop_target704/target/;
-        echo $PASS | sudo -S ln -s /opt/ros2_workshop_target700_host/target/ros2_workshop_target7/aarch64le /opt/ros2_workshop_target704/target/ros2_workshop_target7
-        echo $PASS | sudo -S chown -R $APP_USER:$APP_USER /opt/*;
-        echo $PASS | sudo -S chown -R $APP_USER:$APP_USER /opt/.ros2_workshop_target/*;
-        echo $PASS | sudo -S ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime;
-    fi
-    export DEBIAN_FRONTEND=noninteractive;
-    DEBIAN_FRONTEND=noninteractive echo $PASS | sudo -S apt install -y sudo rename locales \
-    autoconf wget libtool libtool-bin autopoint openjdk-8-jdk \
-    subversion astyle gettext python3 libdbus-1-dev unzip bison \
-    nano git g++ golang libssl-dev build-essential && \
-    echo $PASS | sudo -S dpkg-reconfigure --frontend noninteractive tzdata && \
-    echo $PASS | sudo -S locale-gen en_US.UTF-8 && \
-    echo "export GOPATH=$HOME/go" >> ~/.bashrc && \
-    echo "export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java" >> ~/.bashrc  && \
-    cd /tmp && wget https://cmake.org/files/v3.23/cmake-3.23.0.tar.gz --retry-connrefused -qO - | tar xz && \
-    cd cmake-3.23.0 && ./configure && make -j16 && echo $PASS | sudo -S make install && \
-    cd / && rm -rf /tmp/cmake* && \
+    mkdir -p $ROS2_WORKSHOP_TARGET_CODE_DIR/ros2_humble/src && \
+    cd $ROS2_WORKSHOP_TARGET_CODE_DIR/ros2_humble && \
+    while ! vcs import --input https://raw.githubusercontent.com/ros2/ros2/humble/ros2.repos src; do echo retrying; done && \
+    echo $PASS | sudo -S mkdir -p /etc/ros/rosdep/sources.list.d/ && \
+    echo $PASS | sudo -S curl -o /etc/ros/rosdep/sources.list.d/20-default.list https://mirrors.tuna.tsinghua.edu.cn/github-raw/ros/rosdistro/master/rosdep/sources.list.d/20-default.list && \
+    export ROSDISTRO_INDEX_URL=https://mirrors.tuna.tsinghua.edu.cn/rosdistro/index-v4.yaml && \
+    echo $PASS | sudo -S apt-get update && \
+    echo $PASS | sudo -S apt-get install -y python3-lark libeigen3-dev \
+        libssl-dev libtinyxml2-dev libasio-dev qtbase5-dev python3-pytest-timeout \
+        python3-numpy python3-cairo python3-nose libcunit1-dev libspdlog-dev \
+        libignition-cmake2-dev doxygen libqt5core5a libqt5gui5 libqt5opengl5 \
+        libqt5widgets5 python3-matplotlib pydocstyle qt5-qmake libcurl4-openssl-dev \
+        python3-babeltrace libsqlite3-dev python3-lxml python3-cryptography \
+        python3-pygraphviz python3-pydot python3-netifaces graphviz tango-icon-theme \
+        pybind11-dev libyaml-dev libbenchmark-dev acl libacl1-dev libopencv-dev \
+        libconsole-bridge-dev libtinyxml-dev libpyside2-dev libshiboken2-dev \
+        pyqt5-dev python3-pyqt5 python3-pyqt5.qtsvg python3-pyside2.qtsvg \
+        python3-sip-dev shiboken2 python3-pykdl liborocos-kdl-dev libassimp-dev \
+        libignition-math6-dev python3-lttng google-mock libxml2-utils uncrustify \
+        python3-psutil clang-format clang-tidy libyaml-cpp-dev libbullet-dev \
+        libxaw7-dev libxrandr-dev libgl1-mesa-dev libfreetype6-dev clang-format \
+        libgtest-dev python3-mypy python3-pytest-mock cppcheck libzstd-dev && \
+    while ! rosdep update;do echo retrying; done && \
+    while ! rosdep install --from-paths src --ignore-src -y --skip-keys "fastcdr rti-connext-dds-6.0.1 urdfdom_headers";do echo retrying; done && \
     touch $ROS2_WORKSHOP_TARGET_INITIALIZED_MARK && \
+    echo 'export ROSDISTRO_INDEX_URL=https://mirrors.tuna.tsinghua.edu.cn/rosdistro/index-v4.yaml' >> ~/.bashrc && \
     echo "export PATH=$PATH:/usr/local/bin" >> ~/.bashrc && \
-    echo "source /opt/setenv_64.sh --external /opt/ros2_workshop_target700_host" >> ~/.bashrc;
-
-    # go get -u github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc;
+    cd $ROS2_WORKSHOP_TARGET_DIR/ros2_humble && \
+    while ! colcon build --symlink-install --parallel-workers 16;do echo retrying; done;
 }
 
 if [ ! -f "$ROS2_WORKSHOP_TARGET_INITIALIZED_MARK" ]; then

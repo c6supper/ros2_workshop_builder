@@ -34,40 +34,19 @@ RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key  -o
     python3 -m pip install -U flake8-blind-except flake8-builtins \
     flake8-class-newline flake8-comprehensions flake8-deprecated flake8-docstrings \
     flake8-import-order flake8-quotes pytest-repeat pytest-rerunfailures pytest \
-    setuptools
+    setuptools && \
+    rm -rf /var/lib/apt/lists/*
 
-FROM prepare-ros2-builder AS prepare-ros2-source
+FROM prepare-ros2-builder AS ros2-workshop-target
 ARG APP_USER
 ARG PASS
-USER $APP_USER
-RUN mkdir -p ~/ros2_humble/src && \
-    cd ~/ros2_humble && \
-    while ! vcs import --input https://raw.githubusercontent.com/ros2/ros2/humble/ros2.repos src; do echo retrying; done && \
-    echo $PASS | sudo -S mkdir -p /etc/ros/rosdep/sources.list.d/ && \
-    echo $PASS | sudo -S curl -o /etc/ros/rosdep/sources.list.d/20-default.list https://mirrors.tuna.tsinghua.edu.cn/github-raw/ros/rosdistro/master/rosdep/sources.list.d/20-default.list && \
-    export ROSDISTRO_INDEX_URL=https://mirrors.tuna.tsinghua.edu.cn/rosdistro/index-v4.yaml && \
-    rosdep update && \
-    echo 'export ROSDISTRO_INDEX_URL=https://mirrors.tuna.tsinghua.edu.cn/rosdistro/index-v4.yaml' >> ~/.bashrc && \
-    rosdep install --from-paths src --ignore-src -y --skip-keys "fastcdr rti-connext-dds-6.0.1 urdfdom_headers"
-
-FROM prepare-ros2-source AS builder
-ARG APP_USER
-ARG PASS
-USER $APP_USER
-RUN cd ~/ros2_humble/ && \
-    colcon build --symlink-install --parallel-workers 16
-
-FROM builder AS ros2-workshop-target
-ARG APP_USER
-ARG PASS
-USER $APP_USER
-
 ARG LIVENESS_PROBE
 
 USER $APP_USER
 
 ENV ROS2_WORKSHOP_TARGET_DIR /ros2_workshop_target
 ENV ROS2_WORKSHOP_TARGET_INITIALIZED_MARK $ROS2_WORKSHOP_TARGET_DIR/patched
+ENV ROS2_WORKSHOP_TARGET_CODE_DIR /code/
 COPY --chown=$APP_USER docker/version $ROS2_WORKSHOP_TARGET_DIR/version
 COPY --chown=$APP_USER docker/docker-entrypoint.sh $ROS2_WORKSHOP_TARGET_DIR/docker-entrypoint.sh
 

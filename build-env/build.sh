@@ -36,7 +36,8 @@ version=$(cat docker/version)
 echo "version: $version"
 DIR="$(dirname "$(readlink -f "$0")")"
 
-docker build -t $NAME/$IMAGE -t $NAME/$IMAGE:$version -f ./docker/Dockerfile ./ --build-arg LIVENESS_PROBE="$(cat ${DIR}/tcp-port-wait.sh)"
+docker buildx build --add-host=raw.githubusercontent.com:185.199.111.133 --progress=plain \
+    -t $NAME/$IMAGE -t $NAME/$IMAGE:$version -f ./docker/Dockerfile ./ --build-arg LIVENESS_PROBE="$(cat ${DIR}/tcp-port-wait.sh)"
 
 if [ "$#" -ge  "2" ]
   then
