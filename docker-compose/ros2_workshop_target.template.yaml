@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+   ros2_workshop_target:
+      stdin_open: true
+      tty: true
+      command: [/bin/bash]
+      image: registry.cn-hangzhou.aliyuncs.com/c6supper/ros2_workshop_target:${ROS2_WORKSHOP_TARGET_TAG}
+      container_name: ros2_workshop_target
+      cap_add:
+         - SYS_ADMIN 
+      network_mode: ${APP_NETWORK_MODE}
+      volumes:
+        - ${ROS2_WORKSHOP_TARGET_CODE_VOLUME}:${ROS2_WORKSHOP_TARGET_DIR}
+      restart: ${APP_RESTART_POLICY}
+      environment:
+         RUN_AFTER_SIDECAR: 'no'
+         APP_USER: ${APP_USER}
+         PASS: ${PASS}
+      logging:
+         driver: ${APP_LOGGING_DRIVER}
+         options:
+            max-size: ${APP_LOGGING_SIZE}
+            max-file: ${APP_LOGGING_NUMBER}
