@@ -1,2 +1,2 @@
-# ros2_workshop_builder
-Cross Compile Building Environment
+# ros2_workshop_target
+Building Environment & Target Machine
