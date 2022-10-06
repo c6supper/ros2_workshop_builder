@@ -39,3 +39,4 @@ docker stop `docker ps -aq -f name=ros2_workshop_target_*`
 docker rm `docker ps -aq -f name=ros2_workshop_target_*`
 docker network prune -f
 docker-compose -p "ros2_workshop_target" up -d
+sleep 1;docker logs -f ros2_workshop_target

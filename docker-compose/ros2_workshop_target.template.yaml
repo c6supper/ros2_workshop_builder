@@ -1,9 +1,26 @@
 version: '3.8'
 
 services:
+   ros2_workshop_binfmt:
+      stdin_open: true
+      tty: true
+      image: tonistiigi/binfmt
+      command: [/usr/bin/binfmt --install all]
+      cap_add:
+         - SYS_ADMIN 
+      network_mode: ${APP_NETWORK_MODE}
+      restart: 'no'
+      logging:
+         driver: ${APP_LOGGING_DRIVER}
+         options:
+            max-size: ${APP_LOGGING_SIZE}
+            max-file: ${APP_LOGGING_NUMBER}
+
    ros2_workshop_target:
       stdin_open: true
       tty: true
+      depends_on:
+         - ros2_workshop_binfmt
       command: [/bin/bash]
       image: registry.cn-hangzhou.aliyuncs.com/c6supper/ros2_workshop_target:${ROS2_WORKSHOP_TARGET_TAG}
       container_name: ros2_workshop_target
