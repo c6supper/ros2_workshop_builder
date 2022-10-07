@@ -35,9 +35,11 @@ patch_conf() {
     welcome_message="ROS2 Target is ready. Please chek ROS2 source code in $ROS2_WORKSHOP_TARGET_CODE_DIR
         How to Build?
         Run cd $ROS2_WORKSHOP_TARGET_CODE_DIR/ros2_humble && colcon build --symlink-install --parallel-workers 16" && \
-    echo "export welcome_message=$welcome_message" >> ~/.bashrc && \
-    echo "$welcome_message" && \
-    echo 'echo "$welcome_message"' >> ~/.bashrc
+cat <<EOT >> ~/.bashrc
+export welcome_message="$welcome_message"
+echo "$welcome_message"
+EOT
+    echo "done!"
 }
 
 colcon_ignore() {

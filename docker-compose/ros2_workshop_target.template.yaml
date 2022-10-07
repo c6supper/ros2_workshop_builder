@@ -2,10 +2,11 @@ version: '3.8'
 
 services:
    ros2_workshop_binfmt:
+      container_name: ros2_workshop_binfmt
       stdin_open: true
       tty: true
       image: tonistiigi/binfmt
-      command: [/usr/bin/binfmt --install all]
+      entrypoint: [ "/usr/bin/binfmt", "--install", "all" ]
       cap_add:
          - SYS_ADMIN 
       network_mode: ${APP_NETWORK_MODE}
